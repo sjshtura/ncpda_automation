@@ -1,0 +1,7 @@
+streamlit
+pandas
+openpyxl
+webdriver-manager
+selenium
+python-dotenv
+Pillow
