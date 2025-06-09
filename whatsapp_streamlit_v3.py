@@ -72,14 +72,27 @@ def send_email(recipient, message_text):
 # ----------------------------
 def send_messages(dataframe, message_text, log_box):
     options = webdriver.ChromeOptions()
-    options.add_argument("--user-data-dir=./User_Data")
+    # options.add_argument("--user-data-dir=./User_Data")  # Keep login session
+    # options.add_argument("--headless")  # Classic headless (Windows safe)
+    options.add_argument("--headless-chrome")  # Classic headless (Windows safe)
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--window-size=1920,1080")
+    # options.add_argument("--disable-gpu")  # Don't use on Windows
+    # options.binary_location = r"C:\Program Files\Google\Chrome\Application\chrome.exe"  # Optional
+
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
     driver.get("https://web.whatsapp.com/")
     log_box.markdown("🔵 <b>Please scan the QR code if required. Waiting 20 seconds...</b>", unsafe_allow_html=True)
-    time.sleep(20)
 
     wait = WebDriverWait(driver, 20)
+    try:
+        wait.until(EC.presence_of_element_located((By.TAG_NAME, "canvas")))
+    except:
+        pass
+    time.sleep(20)
+
     failed_records = []
     log_content = ""
 
@@ -112,7 +125,7 @@ def send_messages(dataframe, message_text, log_box):
     return failed_records
 
 # ----------------------------
-# UI Layout: Left (Logo), Right (App)
+# UI Layout
 # ----------------------------
 col_left, col_right = st.columns([1, 2])
 
@@ -139,12 +152,12 @@ with col_right:
         height=200
     )
 
-    message = user_message.replace("\n", "%0A")  # For WhatsApp line breaks
+    message = user_message.replace("\n", "%0A")
 
     send_btn = st.button("🚀 Send WhatsApp Messages")
 
 # ----------------------------
-# Handle Action
+# Action Handler
 # ----------------------------
 if send_btn and uploaded_file:
     try:
